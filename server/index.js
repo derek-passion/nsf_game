@@ -18,7 +18,7 @@ var numberOfConnectedUsers = 0;
 var coin = { x: getRndInteger(50, Constants.WIDTH), y: getRndInteger(50, Constants.HEIGHT) };
 
 //store user info, maps socket_id -> user object.
-var all_users = {}; 
+var all_users = {};
 
 
 io.on("connect", (socket) => {
@@ -34,7 +34,7 @@ io.on("connect", (socket) => {
   });
 
   /*
-  When a user updates their info, broadcast their 
+  When a user updates their info, broadcast their
   new location to the others.
   */
   socket.on("update_coordinates", (params, callback) => {
@@ -94,6 +94,8 @@ io.on("connect", (socket) => {
 app.get("/health", (req, res) => res.send(`${process.env.NODE_ENV}`));
 
 // Expose server on 5000
-server.listen(process.env.PORT || 5000, () =>
-  console.log(`Server has started.`)
+server.listen(process.env.PORT || 5000, () => {
+  console.log(`Server has started.`);
+  console.log("Access game at http://localhost:5000");
+}
 );
