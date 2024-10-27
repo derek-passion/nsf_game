@@ -97,6 +97,10 @@ app.get("/health", (req, res) => res.send(`${process.env.NODE_ENV}`));
 server.listen(process.env.PORT || 5000, () => {
   console.log(`Server has started.`);
   console.log("Access game at http://localhost:5000");
+<<<<<<< HEAD
   console.log("run by derek");
+=======
+  console.log("by: Taiming Wang");
+>>>>>>> affda0a (changed by Taiming)
 }
 );
