@@ -95,7 +95,8 @@ app.get("/health", (req, res) => res.send(`${process.env.NODE_ENV}`));
 
 // Expose server on 5000
 server.listen(process.env.PORT || 5000, () => {
-  console.log(`Server has started.`);
+  console.log("Server has started.");
+  console.log("gyats are amazing - Ryan");
   console.log("Access game at http://localhost:5000");
   console.log("run by Derek");
   console.log("by: Taiming Wang");
