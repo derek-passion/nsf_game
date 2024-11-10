@@ -190,37 +190,32 @@ class PlayGame extends Phaser.Scene {
   update() {
     const cont = this.ship.cont;
     const ship = this.ship.ship;
-    const inc = 7;
+    const inc = 5;
     var keys_down = "";
-    if (this.keys.down.isDown && cont.active) {
-      cont.y += inc;
-      keys_down += "d";
-    }
     if (this.keys.up.isDown && cont.active) {
-      cont.y -= inc;
+      cont.x += inc * Math.sin(ship.angle * Math.PI / 180);
+      cont.y -= inc * Math.cos(ship.angle * Math.PI / 180);
+      keys_down += "u";
+    }
+    if (this.keys.down.isDown && cont.active) {
+      cont.x -= inc / 2 * Math.sin(ship.angle * Math.PI / 180);
+      cont.y += inc / 2 * Math.cos(ship.angle * Math.PI / 180);
       keys_down += "u";
     }
     if (this.keys.right.isDown && cont.active) {
-      cont.x += inc;
-      keys_down += "r";
+      ship.setAngle(ship.angle + 2);
+      keys_down += "r"
     }
     if (this.keys.left.isDown && cont.active) {
-      cont.x -= inc;
-      keys_down += "l";
+      ship.setAngle(ship.angle - 2);
+      keys_down += "l"
     }
     const keys_angle = {
-      u: 0,
-      d: 180,
-      l: 270,
-      r: 90,
-      ur: 45,
-      ul: -45,
-      dr: 135,
-      dl: 225,
+      l: -1,
+      r: 1,
+      ur: 1,
+      ul: -1,
     };
-    if (keys_down in keys_angle) {
-      ship.setAngle(keys_angle[keys_down]);
-    }
     if (Phaser.Input.Keyboard.JustDown(this.space)) {
       this.bullets.fireBullet(
         this.ship.cont.x,
@@ -246,7 +241,7 @@ class PlayGame extends Phaser.Scene {
       fontSize: "13px",
     });
     var ship = this.add.sprite(0, 0, "ship");
-    ship.setAngle(angle);
+    ship.setAngle(0);
     var cont = this.add.container(x, y, [ship, score_text]);
     cont.setSize(45, 45);
     this.physics.add.existing(cont, false);
