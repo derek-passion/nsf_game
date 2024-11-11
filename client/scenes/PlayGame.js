@@ -198,8 +198,8 @@ class PlayGame extends Phaser.Scene {
       keys_down += "u";
     }
     if (this.keys.down.isDown && cont.active) {
-      cont.x -= inc / 2 * Math.sin(ship.angle * Math.PI / 180);
-      cont.y += inc / 2 * Math.cos(ship.angle * Math.PI / 180);
+      cont.x -= inc / 3 * Math.sin(ship.angle * Math.PI / 180);
+      cont.y += inc / 3 * Math.cos(ship.angle * Math.PI / 180);
       keys_down += "u";
     }
     if (this.keys.right.isDown && cont.active) {
@@ -216,7 +216,7 @@ class PlayGame extends Phaser.Scene {
       ur: 1,
       ul: -1,
     };
-    if (Phaser.Input.Keyboard.JustDown(this.space)) {
+    if (this.keys.space.isDown && cont.active) {
       this.bullets.fireBullet(
         this.ship.cont.x,
         this.ship.cont.y - 5,
