@@ -13,7 +13,7 @@
     "socket.io-client": "^2.2.0"
   },
   "scripts": {
-    "build": "npx webpack --mode production",
+    "build": "npx webpack ",
     "start": "nodemon server"
   },
   "browserslist": {
