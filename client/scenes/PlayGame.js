@@ -19,7 +19,7 @@ class PlayGame extends Phaser.Scene {
       this.ENDPOINT = "localhost:5000/";
       console.log("in development mode");
     } else {
-      this.ENDPOINT = "https://nsf-game.vercel.app/";
+      this.ENDPOINT = "https://nsf-game.onrender.com/";
       console.log("in deployment mode");
     }
     console.log(this.ENDPOINT);

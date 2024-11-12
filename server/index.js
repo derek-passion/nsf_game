@@ -105,6 +105,6 @@ server.listen(process.env.PORT || 5000, () => {
 );
 
 // Handle the root route
-app.get('/', (req, res) => {
-  res.send('Hello from Vercel!');
-});
+// app.get('/', (req, res) => {
+//   res.send('Hello from Vercel!');
+// });
