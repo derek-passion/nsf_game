@@ -103,3 +103,8 @@ server.listen(process.env.PORT || 5000, () => {
   console.log("run by William & Daniel");
 }
 );
+
+// Handle the root route
+app.get('/', (req, res) => {
+  res.send('Hello from Vercel!');
+});
