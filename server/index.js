@@ -4,12 +4,12 @@ const express = require("express");
 const socketio = require("socket.io");
 const cors = require("cors");
 
-// init express server, socket io server, and serve static content from `dist`
+// init express server, socket io server, and serve static content from `public`
 const app = express();
 const server = http.createServer(app);
 const io = socketio(server);
 app.use(cors());
-app.use(express.static("dist"));
+app.use(express.static("public"));
 
 const getRndInteger = (min, max) =>
   Math.floor(Math.random() * (max - min)) + min;
