@@ -14,6 +14,7 @@ class PlayGame extends Phaser.Scene {
   /* Initialize client connection to socket server*/
   init(name) {
     console.log("NODE_ENV", process.env.NODE_ENV);
+    console.log("version 11/11 16:49");
     if (!process.env.NODE_ENV || process.env.NODE_ENV === "development") {
       this.ENDPOINT = "localhost:5000/";
       console.log("in development mode");
