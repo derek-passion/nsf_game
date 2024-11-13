@@ -15,7 +15,7 @@
     "webpack-cli": "^5.1.4"
   },
   "scripts": {
-    "build": "node ./node_modules/webpack/bin/webpack.js",
+    "build": "npx webpack",
     "start": "nodemon server"
   },
   "browserslist": {
