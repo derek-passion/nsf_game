@@ -6,7 +6,7 @@ module.exports = {
   entry: './client/main.js',
   output: {
     filename: 'bundle.js',
-    path: path.resolve(__dirname, 'dist'),
+    path: path.resolve(__dirname, 'public'),
   },
   module: {
     rules: [
@@ -28,8 +28,8 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: './client/index.html'
     }),
-    new webpack.DefinePlugin({
-      'process.env.NODE_ENV': JSON.stringify('development')
-    })
+    // new webpack.DefinePlugin({
+    //   'process.env.NODE_ENV': JSON.stringify('production')
+    // })
   ]
 };

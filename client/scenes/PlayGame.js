@@ -13,10 +13,14 @@ class PlayGame extends Phaser.Scene {
 
   /* Initialize client connection to socket server*/
   init(name) {
+    console.log("NODE_ENV", process.env.NODE_ENV);
+    console.log("version 11/11 16:49");
     if (!process.env.NODE_ENV || process.env.NODE_ENV === "development") {
       this.ENDPOINT = "localhost:5000/";
+      console.log("in development mode");
     } else {
-      this.ENDPOINT = "https://phaser-mp-app-a56a58a9a832.herokuapp.com/";
+      this.ENDPOINT = "https://nsf-game.onrender.com/";
+      console.log("in deployment mode");
     }
     console.log(this.ENDPOINT);
     this.name = name;
@@ -69,7 +73,7 @@ class PlayGame extends Phaser.Scene {
       this.score,
       this.name,
       0
-    ); 
+    );
     this.socket = io(this.ENDPOINT); //connect to server.
     // Create bullet sprite-group
     this.bullets = new Bullets(this);
