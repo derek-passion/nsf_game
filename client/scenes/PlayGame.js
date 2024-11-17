@@ -33,6 +33,7 @@ class PlayGame extends Phaser.Scene {
     this.others = {}; //to store other players
     this.x = Phaser.Math.Between(50, Constants.WIDTH - 50); // random initial x,y coordinates
     this.y = Phaser.Math.Between(50, Constants.HEIGHT - 50);
+    this.speed = 5;
   }
 
   /* Load assets */
@@ -203,7 +204,7 @@ class PlayGame extends Phaser.Scene {
   update() {
     const cont = this.ship.cont;
     const ship = this.ship.ship;
-    const inc = 5;
+    var inc = this.speed;
     var keys_down = "";
     if (this.keys.up.isDown && cont.active) {
       cont.x += inc * Math.sin(ship.angle * Math.PI / 180);
@@ -291,7 +292,7 @@ class PlayGame extends Phaser.Scene {
   get_item = (x, y) => {
     var item = this.add.sprite(x, y, "item");
     this.physics.add.existing(item, false);
-    this.physics.add.collider(item, this.ship.ship, this.fire, null, this);
+    this.physics.add.collider(item, this.ship.ship, this.collectItem, null, this);
     return item;
   };
 
@@ -312,6 +313,25 @@ class PlayGame extends Phaser.Scene {
     });
     this.check_for_winner(this.score);
   };
+
+  collectItem = (item) => {
+    console.log("Item collected!");
+    this.ship.score_text.setText(`${this.name}: ${this.score}`);
+
+    this.speed += 5;
+    
+    this.coin_sound.play();
+    item.x = Phaser.Math.Between(20, Constants.WIDTH - 20);
+    item.y = Phaser.Math.Between(20, Constants.HEIGHT - 20);
+    
+    this.socket.emit("update_item", {
+      x: item.x,
+      y: item.y,
+    });
+    
+    this.check_for_winner(this.score);
+  };
+  
 
   /*
   Create bullet objects for enemies (for new enemies or new clients), then create a collider callback
