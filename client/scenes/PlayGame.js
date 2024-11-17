@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import Coin from "../assets/coin.svg";
+import Item from "../assets/item.png";
 import Spaceship from "../assets/spaceship.svg";
 import BulletIcon from "../assets/bullet.svg";
 import Bullets from "./Bullets";
@@ -42,6 +43,7 @@ class PlayGame extends Phaser.Scene {
       endFrame: 23,
     });
     this.load.image("coin", Coin);
+    this.load.image("item", Item);
     this.load.image("ship", Spaceship);
     this.load.image("bullet", BulletIcon);
     this.load.audio("explosion", ExplosionSound);
@@ -108,6 +110,8 @@ class PlayGame extends Phaser.Scene {
         this.check_for_winner(score);
       }
       this.coin = this.get_coin(params.coin.x, params.coin.y);
+      this.item = this.get_item(100, 100);
+      // this.item = this.get_item(params.item.x, params.item.y);
       /*
       Update server with coordinates.
       */
@@ -158,6 +162,11 @@ class PlayGame extends Phaser.Scene {
       this.coin_sound.play();
       this.coin.x = params.coin.x;
       this.coin.y = params.coin.y;
+    });
+
+    this.socket.on("item_changed", (params, callback) => {
+      this.item.x = params.item.x;
+      this.item.y = params.item.y;
     });
 
     /*
@@ -277,6 +286,13 @@ class PlayGame extends Phaser.Scene {
     this.physics.add.existing(coin, false);
     this.physics.add.collider(coin, this.ship.ship, this.fire, null, this);
     return coin;
+  };
+
+  get_item = (x, y) => {
+    var item = this.add.sprite(x, y, "item");
+    this.physics.add.existing(item, false);
+    this.physics.add.collider(item, this.ship.ship, this.fire, null, this);
+    return item;
   };
 
   /*
