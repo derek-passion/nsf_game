@@ -33,7 +33,8 @@ class PlayGame extends Phaser.Scene {
     this.others = {}; //to store other players
     this.x = Phaser.Math.Between(50, Constants.WIDTH - 50); // random initial x,y coordinates
     this.y = Phaser.Math.Between(50, Constants.HEIGHT - 50);
-    this.speed = 5;
+    this.speed = 0;
+    this.last_fire = 0
   }
 
   /* Load assets */
@@ -204,17 +205,41 @@ class PlayGame extends Phaser.Scene {
   update() {
     const cont = this.ship.cont;
     const ship = this.ship.ship;
-    var inc = this.speed;
     var keys_down = "";
     if (this.keys.up.isDown && cont.active) {
-      cont.x += inc * Math.sin(ship.angle * Math.PI / 180);
-      cont.y -= inc * Math.cos(ship.angle * Math.PI / 180);
+      this.speed += Constants.ACCELERATION;
+      if (this.speed > Constants.MAX_SPEED) {
+        this.speed = Constants.MAX_SPEED;
+      }
+      cont.x += this.speed * Math.sin(ship.angle * Math.PI / 180);
+      cont.y -= this.speed * Math.cos(ship.angle * Math.PI / 180);
       keys_down += "u";
     }
-    if (this.keys.down.isDown && cont.active) {
-      cont.x -= inc / 3 * Math.sin(ship.angle * Math.PI / 180);
-      cont.y += inc / 3 * Math.cos(ship.angle * Math.PI / 180);
+    else if (this.keys.down.isDown && cont.active) {
+      this.speed -= Constants.ACCELERATION;
+      if (this.speed < -Constants.MAX_SPEED/3) {
+        this.speed = -Constants.MAX_SPEED/3;
+      }
+      cont.x += this.speed * Math.sin(ship.angle * Math.PI / 180);
+      cont.y -= this.speed * Math.cos(ship.angle * Math.PI / 180);
       keys_down += "u";
+    }
+    else {
+      if (this.speed > 0) {
+        this.speed -= Constants.ACCELERATION/2;
+        if (this.speed < 0) {
+          this.speed = 0;
+        }
+      }
+      else if (this.speed < 0) {
+        this.speed += Constants.ACCELERATION/2;
+        if (this.speed > 0) {
+          this.speed = 0;
+        }
+      }
+      cont.x += this.speed * Math.sin(ship.angle * Math.PI / 180);
+      cont.y -= this.speed * Math.cos(ship.angle * Math.PI / 180);
+      
     }
     if (this.keys.right.isDown && cont.active) {
       ship.setAngle(ship.angle + 2);
@@ -231,15 +256,19 @@ class PlayGame extends Phaser.Scene {
       ul: -1,
     };
     if (this.keys.space.isDown && cont.active) {
-      this.bullets.fireBullet(
-        this.ship.cont.x,
-        this.ship.cont.y - 5,
-        this.ship.ship.angle,
-        () => {
-          this.socket.emit("shot");
-          this.shot_sound.play();
-        }
-      );
+      console.log(this.last_fire);
+      if (this.last_fire < (Date.now() - Constants.RELOAD)) {
+        this.last_fire = Date.now()
+        this.bullets.fireBullet(
+          this.ship.cont.x,
+          this.ship.cont.y - 5,
+          this.ship.ship.angle,
+          () => {
+            this.socket.emit("shot");
+            this.shot_sound.play();
+          }
+        );
+      }
     }
     this.emit_coordinates();
   }
