@@ -16,6 +16,7 @@ const getRndInteger = (min, max) =>
 
 var numberOfConnectedUsers = 0;
 var coin = { x: getRndInteger(50, Constants.WIDTH), y: getRndInteger(50, Constants.HEIGHT) };
+var item = { x: getRndInteger(50, Constants.WIDTH), y: getRndInteger(50, Constants.HEIGHT) };
 
 //store user info, maps socket_id -> user object.
 var all_users = {};
@@ -30,6 +31,7 @@ io.on("connect", (socket) => {
   socket.emit("to_new_user", {
     id: socket.id,
     coin: coin,
+    item: item,
     others: all_users,
   });
 
@@ -66,6 +68,12 @@ io.on("connect", (socket) => {
     coin = { x: params.x, y: params.y };
     socket.broadcast.emit("coin_changed", {
       coin,
+    });
+  });
+  socket.on("update_item", (params, callback) => {
+    item = { x: params.x, y: params.y };
+    socket.broadcast.emit("item_changed", {
+      item,
     });
   });
 

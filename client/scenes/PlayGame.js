@@ -35,6 +35,7 @@ class PlayGame extends Phaser.Scene {
     this.y = Phaser.Math.Between(50, Constants.HEIGHT - 50);
     this.speed = 0;
     this.last_fire = 0
+    this.num_fire = 1
   }
 
   /* Load assets */
@@ -112,8 +113,7 @@ class PlayGame extends Phaser.Scene {
         this.check_for_winner(score);
       }
       this.coin = this.get_coin(params.coin.x, params.coin.y);
-      this.item = this.get_item(100, 100);
-      // this.item = this.get_item(params.item.x, params.item.y);
+      this.item = this.get_item(params.item.x, params.item.y);
       /*
       Update server with coordinates.
       */
@@ -205,40 +205,41 @@ class PlayGame extends Phaser.Scene {
   update() {
     const cont = this.ship.cont;
     const ship = this.ship.ship;
+    const fps = this.game.loop.actualFps;
     var keys_down = "";
     if (this.keys.up.isDown && cont.active) {
-      this.speed += Constants.ACCELERATION;
+      this.speed += Constants.ACCELERATION*60/fps;
       if (this.speed > Constants.MAX_SPEED) {
         this.speed = Constants.MAX_SPEED;
       }
-      cont.x += this.speed * Math.sin(ship.angle * Math.PI / 180);
-      cont.y -= this.speed * Math.cos(ship.angle * Math.PI / 180);
+      cont.x += this.speed * Math.sin(ship.angle * Math.PI / 180)*60/fps;
+      cont.y -= this.speed * Math.cos(ship.angle * Math.PI / 180)*60/fps;
       keys_down += "u";
     }
     else if (this.keys.down.isDown && cont.active) {
-      this.speed -= Constants.ACCELERATION;
+      this.speed -= Constants.ACCELERATION*60/fps;
       if (this.speed < -Constants.MAX_SPEED/3) {
         this.speed = -Constants.MAX_SPEED/3;
       }
-      cont.x += this.speed * Math.sin(ship.angle * Math.PI / 180);
-      cont.y -= this.speed * Math.cos(ship.angle * Math.PI / 180);
+      cont.x += this.speed * Math.sin(ship.angle * Math.PI / 180)*60/fps;
+      cont.y -= this.speed * Math.cos(ship.angle * Math.PI / 180)*60/fps;
       keys_down += "u";
     }
     else {
       if (this.speed > 0) {
-        this.speed -= Constants.ACCELERATION/2;
+        this.speed -= Constants.ACCELERATION*3/4*60/fps;
         if (this.speed < 0) {
           this.speed = 0;
         }
       }
       else if (this.speed < 0) {
-        this.speed += Constants.ACCELERATION/2;
+        this.speed += Constants.ACCELERATION*3/4*60/fps;
         if (this.speed > 0) {
           this.speed = 0;
         }
       }
-      cont.x += this.speed * Math.sin(ship.angle * Math.PI / 180);
-      cont.y -= this.speed * Math.cos(ship.angle * Math.PI / 180);
+      cont.x += this.speed * Math.sin(ship.angle * Math.PI / 180)*60/fps;
+      cont.y -= this.speed * Math.cos(ship.angle * Math.PI / 180)*60/fps;
       
     }
     if (this.keys.right.isDown && cont.active) {
@@ -259,6 +260,26 @@ class PlayGame extends Phaser.Scene {
       console.log(this.last_fire);
       if (this.last_fire < (Date.now() - Constants.RELOAD)) {
         this.last_fire = Date.now()
+        for (let i = 1; i <= this.num_fire-1; i++) {
+          this.bullets.fireBullet(
+            this.ship.cont.x,
+            this.ship.cont.y - 5,
+            this.ship.ship.angle+10*i,
+            () => {
+              this.socket.emit("shot");
+              this.shot_sound.play();
+            }
+          );
+          this.bullets.fireBullet(
+            this.ship.cont.x,
+            this.ship.cont.y - 5,
+            this.ship.ship.angle-10*i,
+            () => {
+              this.socket.emit("shot");
+              this.shot_sound.play();
+            }
+          );
+        }
         this.bullets.fireBullet(
           this.ship.cont.x,
           this.ship.cont.y - 5,
@@ -347,7 +368,7 @@ class PlayGame extends Phaser.Scene {
     console.log("Item collected!");
     this.ship.score_text.setText(`${this.name}: ${this.score}`);
 
-    this.speed += 5;
+    this.num_fire += 0.2;
     
     this.coin_sound.play();
     item.x = Phaser.Math.Between(20, Constants.WIDTH - 20);
@@ -381,7 +402,7 @@ class PlayGame extends Phaser.Scene {
           if (!bullet.disabled) {
             this.emmit_collision(id, i);
             bullet.disabled = true;
-            enemy_bullets.children.entries[i].setActive(false)
+            enemy_bullets.children.entries[i].setActive(false);
             this.animate_explosion("0");
           } else {
             setTimeout(() => {
@@ -425,18 +446,23 @@ class PlayGame extends Phaser.Scene {
     var ship;
     if (id === "0") {
       ship = this.ship.cont;
+      var boom = this.add.sprite(ship.x, ship.y, "boom");
+      boom.anims.play("explode");
+      this.explosion_sound.play();
       ship.setActive(false);
       this.score = Math.max(0, this.score - 2);
       this.ship.score_text.setText(`${this.name}: ${this.score}`);
+      ship.x = Phaser.Math.Between(50, Constants.WIDTH - 50);
+      ship.y = Phaser.Math.Between(50, Constants.HEIGHT - 50);
       setTimeout(() => {
         ship.setActive(true);
       }, 1000);
     } else {
       ship = this.others[id].ship.cont;
+      var boom = this.add.sprite(ship.x, ship.y, "boom");
+      boom.anims.play("explode");
+      this.explosion_sound.play();
     }
-    var boom = this.add.sprite(ship.x, ship.y, "boom");
-    boom.anims.play("explode");
-    this.explosion_sound.play();
   };
 
   /*
