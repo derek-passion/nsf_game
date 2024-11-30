@@ -8,7 +8,7 @@ export default class Bullets extends Phaser.Physics.Arcade.Group {
     super(scene.physics.world, scene);
     this.disabled = false;
     this.createMultiple({
-      frameQuantity: 1000,
+      frameQuantity: 5000,
       key: "bullet",
       active: false,
       visible: false,

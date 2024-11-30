@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import Coin from "../assets/coin.svg";
-import Item from "../assets/item.png";
+import blue_orb from "../assets/blue_orb.png";
+import red_orb from "../assets/red_orb.png";
 import Spaceship from "../assets/spaceship.svg";
 import BulletIcon from "../assets/bullet.svg";
 import Bullets from "./Bullets";
@@ -34,8 +35,12 @@ class PlayGame extends Phaser.Scene {
     this.x = Phaser.Math.Between(50, Constants.WIDTH - 50); // random initial x,y coordinates
     this.y = Phaser.Math.Between(50, Constants.HEIGHT - 50);
     this.speed = 0;
-    this.last_fire = 0
-    this.num_fire = 1
+    this.reload = Constants.RELOAD;
+    this.max_speed = Constants.MAX_SPEED;
+    this.acceleration = Constants.ACCELERATION;
+    this.last_fire = 0;
+    this.num_fire = 1;
+    this.turn_speed = Constants.TURN_SPEED;
   }
 
   /* Load assets */
@@ -46,7 +51,8 @@ class PlayGame extends Phaser.Scene {
       endFrame: 23,
     });
     this.load.image("coin", Coin);
-    this.load.image("item", Item);
+    this.load.image("blue_orb", blue_orb);
+    this.load.image("red_orb", red_orb);
     this.load.image("ship", Spaceship);
     this.load.image("bullet", BulletIcon);
     this.load.audio("explosion", ExplosionSound);
@@ -113,7 +119,8 @@ class PlayGame extends Phaser.Scene {
         this.check_for_winner(score);
       }
       this.coin = this.get_coin(params.coin.x, params.coin.y);
-      this.item = this.get_item(params.item.x, params.item.y);
+      this.blue_orb = this.get_item("blue_orb", params.blue_orb.x, params.blue_orb.y);
+      this.red_orb = this.get_item("red_orb", params.red_orb.x, params.red_orb.y);
       /*
       Update server with coordinates.
       */
@@ -167,8 +174,8 @@ class PlayGame extends Phaser.Scene {
     });
 
     this.socket.on("item_changed", (params, callback) => {
-      this.item.x = params.item.x;
-      this.item.y = params.item.y;
+      this.change_item(params.item.item_name, "x", params.item.x);
+      this.change_item(params.item.item_name, "y", params.item.y);
     });
 
     /*
@@ -208,18 +215,18 @@ class PlayGame extends Phaser.Scene {
     const fps = this.game.loop.actualFps;
     var keys_down = "";
     if (this.keys.up.isDown && cont.active) {
-      this.speed += Constants.ACCELERATION*60/fps;
-      if (this.speed > Constants.MAX_SPEED) {
-        this.speed = Constants.MAX_SPEED;
+      this.speed += this.acceleration*60/fps;
+      if (this.speed > this.max_speed) {
+        this.speed = this.max_speed;
       }
       cont.x += this.speed * Math.sin(ship.angle * Math.PI / 180)*60/fps;
       cont.y -= this.speed * Math.cos(ship.angle * Math.PI / 180)*60/fps;
       keys_down += "u";
     }
     else if (this.keys.down.isDown && cont.active) {
-      this.speed -= Constants.ACCELERATION*60/fps;
-      if (this.speed < -Constants.MAX_SPEED/3) {
-        this.speed = -Constants.MAX_SPEED/3;
+      this.speed -= this.acceleration*60/fps;
+      if (this.speed < -this.max_speed/3) {
+        this.speed = -this.max_speed/3;
       }
       cont.x += this.speed * Math.sin(ship.angle * Math.PI / 180)*60/fps;
       cont.y -= this.speed * Math.cos(ship.angle * Math.PI / 180)*60/fps;
@@ -227,13 +234,13 @@ class PlayGame extends Phaser.Scene {
     }
     else {
       if (this.speed > 0) {
-        this.speed -= Constants.ACCELERATION*3/4*60/fps;
+        this.speed -= this.acceleration*3/4*60/fps;
         if (this.speed < 0) {
           this.speed = 0;
         }
       }
       else if (this.speed < 0) {
-        this.speed += Constants.ACCELERATION*3/4*60/fps;
+        this.speed += this.acceleration*3/4*60/fps;
         if (this.speed > 0) {
           this.speed = 0;
         }
@@ -258,8 +265,17 @@ class PlayGame extends Phaser.Scene {
     };
     if (this.keys.space.isDown && cont.active) {
       console.log(this.last_fire);
-      if (this.last_fire < (Date.now() - Constants.RELOAD)) {
+      if (this.last_fire < (Date.now() - this.reload)) {
         this.last_fire = Date.now()
+        this.bullets.fireBullet(
+          this.ship.cont.x,
+          this.ship.cont.y - 5,
+          this.ship.ship.angle,
+          () => {
+            this.socket.emit("shot");
+            this.shot_sound.play();
+          }
+        );
         for (let i = 1; i <= this.num_fire-1; i++) {
           this.bullets.fireBullet(
             this.ship.cont.x,
@@ -280,15 +296,6 @@ class PlayGame extends Phaser.Scene {
             }
           );
         }
-        this.bullets.fireBullet(
-          this.ship.cont.x,
-          this.ship.cont.y - 5,
-          this.ship.ship.angle,
-          () => {
-            this.socket.emit("shot");
-            this.shot_sound.play();
-          }
-        );
       }
     }
     this.emit_coordinates();
@@ -339,12 +346,31 @@ class PlayGame extends Phaser.Scene {
     return coin;
   };
 
-  get_item = (x, y) => {
-    var item = this.add.sprite(x, y, "item");
+  get_item = (item_name, x, y) => {
+    var item = this.add.sprite(x, y, item_name);
     this.physics.add.existing(item, false);
-    this.physics.add.collider(item, this.ship.ship, this.collectItem, null, this);
+    console.log(item_name);
+    this.physics.add.collider(item, this.ship.ship, () => this.collectItem(item, item_name), null, this);
     return item;
   };
+  change_item = (item_name, part, val) => {
+    if (item_name == "blue_orb") {
+      if (part == "x") {
+        this.blue_orb.x = val;
+      }
+      else {
+        this.blue_orb.y = val;
+      }
+    }
+    else if (item_name == "red_orb") {
+      if (part == "x") {
+        this.red_orb.x = val;
+      }
+      else {
+        this.red_orb.y = val;
+      }
+    }
+  }
 
   /*
   When a player overlaps with the coin,
@@ -364,17 +390,23 @@ class PlayGame extends Phaser.Scene {
     this.check_for_winner(this.score);
   };
 
-  collectItem = (item) => {
-    console.log("Item collected!");
+  collectItem = (item, item_name) => {
     this.ship.score_text.setText(`${this.name}: ${this.score}`);
 
-    this.num_fire += 0.2;
-    
+    if (item_name == "blue_orb") {
+      this.max_speed += 0.25;
+      this.acceleration += 0.005;
+    }
+    else if (item_name == "red_orb") {
+      this.num_fire += 0.25;
+      this.reload -= 5;
+    }
     this.coin_sound.play();
     item.x = Phaser.Math.Between(20, Constants.WIDTH - 20);
     item.y = Phaser.Math.Between(20, Constants.HEIGHT - 20);
     
     this.socket.emit("update_item", {
+      item_name: item_name,
       x: item.x,
       y: item.y,
     });

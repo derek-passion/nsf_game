@@ -5,4 +5,5 @@ export default class Constants {
   static RELOAD = 500;
   static MAX_SPEED = 5;
   static ACCELERATION = 0.1;
+  static TURN_SPEED = 3;
 }

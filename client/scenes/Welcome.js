@@ -58,6 +58,9 @@ export default class Welcome extends Phaser.Scene {
     */
   update() {
     if (Phaser.Input.Keyboard.JustDown(this.enter)) {
+      if (this.name == "") {
+        this.name = "Player";
+      }
       this.scene.start("playgame", this.name);
     }
     this.text.setText(this.welcome_text + this.name);
