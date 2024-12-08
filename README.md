@@ -19,4 +19,4 @@ $ npm run build
 $ npm run start
 ```
 
-Then access through `localhost:5000` (Try with multiple client tabs)
+Then access through `localhost:3000` (Try with multiple client tabs)

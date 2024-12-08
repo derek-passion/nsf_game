@@ -18,7 +18,7 @@ class PlayGame extends Phaser.Scene {
     console.log("NODE_ENV", process.env.NODE_ENV);
     console.log("version 11/11 16:49");
     if (!process.env.NODE_ENV || process.env.NODE_ENV === "development") {
-      this.ENDPOINT = "localhost:5000/";
+      this.ENDPOINT = "localhost:3000/";
       console.log("in development mode");
     } else {
       this.ENDPOINT = "https://nsf-game.onrender.com/";
@@ -85,6 +85,16 @@ class PlayGame extends Phaser.Scene {
       this.name,
       0
     );
+    // Enable collision with world bounds
+    // Listen for collisions with world bounds
+    this.physics.world.on('worldbounds', (body) => {
+      //if (body.gameObject === this.ship) {
+          console.log('ship hit the boundary!');
+          this.animate_explosion("0");
+      // }
+  });
+
+
     this.socket = io(this.ENDPOINT); //connect to server.
     // Create bullet sprite-group
     this.bullets = new Bullets(this);
@@ -214,6 +224,7 @@ class PlayGame extends Phaser.Scene {
     const ship = this.ship.ship;
     const fps = this.game.loop.actualFps;
     var keys_down = "";
+    console.log(cont.x, cont.y);
     if (this.keys.up.isDown && cont.active) {
       this.speed += this.acceleration*60/fps;
       if (this.speed > this.max_speed) {
@@ -318,6 +329,8 @@ class PlayGame extends Phaser.Scene {
     this.physics.add.existing(cont, false);
     this.physics.add.existing(ship, false);
     cont.body.setCollideWorldBounds(true);
+    cont.body.onWorldBounds = true; // Enable world bounds event
+
     return { score_text, ship, cont };
   };
 
