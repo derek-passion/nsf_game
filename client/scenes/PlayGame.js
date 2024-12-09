@@ -3,6 +3,7 @@ import Coin from "../assets/coin.svg";
 import blue_orb from "../assets/blue_orb.png";
 import red_orb from "../assets/red_orb.png";
 import Spaceship from "../assets/spaceship.svg";
+import Robot from "../assets/robot.jpg";
 import BulletIcon from "../assets/bullet.svg";
 import Bullets from "./Bullets";
 import Explosion from "../assets/explosion.png";
@@ -54,6 +55,7 @@ class PlayGame extends Phaser.Scene {
     this.load.image("blue_orb", blue_orb);
     this.load.image("red_orb", red_orb);
     this.load.image("ship", Spaceship);
+    this.load.image("robot", Robot);
     this.load.image("bullet", BulletIcon);
     this.load.audio("explosion", ExplosionSound);
     this.load.audio("shot", ShotSound);
@@ -258,7 +260,7 @@ class PlayGame extends Phaser.Scene {
       }
       cont.x += this.speed * Math.sin(ship.angle * Math.PI / 180)*60/fps;
       cont.y -= this.speed * Math.cos(ship.angle * Math.PI / 180)*60/fps;
-      
+
     }
     if (this.keys.right.isDown && cont.active) {
       ship.setAngle(ship.angle + 2);
@@ -322,7 +324,8 @@ class PlayGame extends Phaser.Scene {
       align: "center",
       fontSize: "13px",
     });
-    var ship = this.add.sprite(0, 0, "ship");
+    // var ship = this.add.sprite(0, 0, "ship");
+    var ship = this.add.sprite(0, 0, "robot");
     ship.setAngle(0);
     var cont = this.add.container(x, y, [ship, score_text]);
     cont.setSize(45, 45);
@@ -409,17 +412,17 @@ class PlayGame extends Phaser.Scene {
       console.error("Item is not valid");
       return; // Exit if item is invalid
     }
-  
+
     // Check for a cooldown to prevent multiple item collections from firing too quickly
     if (this.itemCollectCooldown) {
       console.log("Cooldown active. Please wait...");
       return;
     }
     this.itemCollectCooldown = true;
-  
+
     // Update the score text for the player
     this.ship.score_text.setText(`${this.name}: ${this.score}`);
-  
+
     // Modify stats based on the item collected
     if (item_name === "blue_orb") {
       this.max_speed += 0.25;
@@ -428,13 +431,13 @@ class PlayGame extends Phaser.Scene {
       this.num_fire += 0.25;
       this.reload -= 5;
     }
-  
+
     // Play the coin sound immediately
     this.coin_sound.play();
-  
+
     // Hide the item for 3 seconds
     item.setVisible(false);
-  
+
     // Use setTimeout to delay the item's movement for 3 seconds
     setTimeout(() => {
       // Ensure item and socket are still valid after delay
@@ -442,30 +445,30 @@ class PlayGame extends Phaser.Scene {
         // Move the item to a new random position
         item.x = Phaser.Math.Between(20, Constants.WIDTH - 20);
         item.y = Phaser.Math.Between(20, Constants.HEIGHT - 20);
-  
+
         // Emit the updated item position to the server
         this.socket.emit("update_item", {
           item_name: item_name,
           x: item.x,
           y: item.y,
         });
-  
+
         console.log(`Item ${item_name} moved to new position: x=${item.x}, y=${item.y}`);
-  
+
         // Make the item visible again
         item.setVisible(true);
       } else {
         console.warn("Item or socket is not valid.");
       }
-  
+
       // End the cooldown after the item has moved
       this.itemCollectCooldown = false;
     }, 3000); // Delay of 3 seconds
-  
+
     // Check if there is a winner
     this.check_for_winner(this.score);
   };
-  
+
 
   /*
   Create bullet objects for enemies (for new enemies or new clients), then create a collider callback
