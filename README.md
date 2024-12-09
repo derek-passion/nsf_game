@@ -1,22 +1,7 @@
-# Phaser3 Multiplayer Shooter
-![Game Demo](updated.gif)
-### Usage
-
-Make sure to have node.js installed.
-Install the dependencies and start both dev servers.
-
-```sh
-$ npm install
-```
-
-Open multiple client tabs to play (within a single local network).
-
-In a dev/prod environment, the client is bundled into a dist directory and is served by the node app as static content.
-
-First build client, and run server
-```sh
-$ npm run build
-$ npm run start
-```
+# 2100 Robot Fight!
 
 Then access through `localhost:3000` (Try with multiple client tabs)
+Live game: https://nsf-game.onrender.com/
+
+
+Based on https://github.com/ihababdelkareem/phaser3-multiplayer
