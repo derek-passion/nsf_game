@@ -533,6 +533,7 @@ class PlayGame extends Phaser.Scene {
     var ship;
     if (id === "0") {
       ship = this.ship.cont;
+      this.speed = 0;
       var boom = this.add.sprite(ship.x, ship.y, "boom");
       boom.anims.play("explode");
       this.explosion_sound.play();
